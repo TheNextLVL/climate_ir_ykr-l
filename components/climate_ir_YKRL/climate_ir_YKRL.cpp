@@ -38,8 +38,8 @@ void YKRLClimate::transmit_state() {
     //Set data
     // Iterate trough each frame
     bool bit;
-    for (int i = 0; i < 12; i++){
-        for (uint8_t mask = 1; mask >0; mask <<=1){ //swap bit trough mask
+    for (int i = 0; i < 13; i++){
+        for (uint8_t mask = 128; mask >0; mask >>=1){ //swap bit trough mask
             data -> mark(BIT_MARK);
             bit = remote_state[i] & mask;
             data->space(bit ? ONE_SPACE : ZERO_SPACE);
@@ -51,5 +51,9 @@ void YKRLClimate::transmit_state() {
     transmit.perform();
 }
 
+bool YKRLClimate::on_receive(remote_base::RemoteReceiveData data){
+    //TODO
+    return true;
+}
 }  // namespace climate_ir_YKRL
 }  // namespace esphome

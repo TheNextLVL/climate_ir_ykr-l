@@ -15,8 +15,8 @@ const uint16_t LEAD_IN_MARK = 9020;
 const uint16_t LEAD_IN_SPACE = 4520;
 const uint16_t LEAD_OUT_SPACE = 50000; // Message space
 const uint16_t BIT_MARK = 552;
-const uint16_t ONE_SPACE = 657;
-const uint16_t ZERO_SPACE = 1735;
+const uint16_t ZERO_SPACE = 657;
+const uint16_t ONE_SPACE = 1735;
 
 class YKRLClimate : public climate_ir::ClimateIR {
     public:
