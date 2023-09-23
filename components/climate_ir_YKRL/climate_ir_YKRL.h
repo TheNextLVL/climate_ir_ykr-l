@@ -39,6 +39,8 @@ class YKRLClimate : public climate_ir::ClimateIR {
         void transmit_state() override;
         /// Handle received IR Buffer
         bool on_receive(remote_base::RemoteReceiveData data) override;
+        /// Parse the ir received frame
+        bool parse_state_frame_(const uint8_t frame[]);
 
         /// Calculate values depending of the mode,temp,etc...
         uint8_t temperature_();

@@ -11,6 +11,7 @@ climate::ClimateTraits YKRLClimate::traits(){
     auto traits = ClimateIR::traits();
     auto modes = traits.get_supported_modes();
     modes.erase(climate::CLIMATE_MODE_HEAT_COOL);
+    modes.insert(climate::CLIMATE_MODE_AUTO);
     traits.set_supported_modes(modes);
     return traits;
 }
@@ -74,8 +75,87 @@ void YKRLClimate::transmit_state() {
 }
 
 bool YKRLClimate::on_receive(remote_base::RemoteReceiveData data){
-    //TODO
+    uint8_t state_frame[STATE_FRAME_SIZE] = {};
+
+    if (!data.expect_item(LEAD_IN_MARK,LEAD_IN_SPACE)){
+        return false;
+    }
+    ESP_LOGCONFIG(TAG, "LEAD_IN");
+
+
+    for (uint8_t pos = 0; pos < STATE_FRAME_SIZE; pos++) {
+        uint8_t byte = 0;
+        for (int8_t bit = 0; bit < 8; bit++) {
+            if (data.expect_item(BIT_MARK, ONE_SPACE)) {
+                byte |= 1 << bit;
+            } else if (!data.expect_item(BIT_MARK, ZERO_SPACE)) {
+                return false;
+            }
+        }
+        ESP_LOGCONFIG(TAG, "RX[%i] %x", pos, byte);
+        state_frame[pos] = byte;
+    }
+    // SKIP AT THIS MOMENT
+    // if (!data.expect_item(BIT_MARK,LEAD_OUT_SPACE)){
+    //     return false;
+    // }
+
+    ESP_LOGCONFIG(TAG, "MESSAGE");
+
+    return parse_state_frame_(state_frame);
+}
+
+bool YKRLClimate::parse_state_frame_(const uint8_t frame[]){
+    uint16_t checksum = 0;
+
+    for (int i = 0; i < STATE_FRAME_SIZE - 1; i++){
+        checksum += frame[i];
+    }
+    checksum = checksum & 0xFF;
+
+    if (frame[STATE_FRAME_SIZE-1] != checksum){
+        ESP_LOGCONFIG(TAG, "Bad checksum %x", checksum);
+        return false;
+    }
+
+    uint8_t temp = frame[1] >> 3;
+    if (temp > 0){
+        this->target_temperature = frame[3] >> 7 ? temp + TEMP_OFFSET + 0.5f : temp + TEMP_OFFSET;
+    }
+    ESP_LOGCONFIG(TAG, "Temperature %f", this->target_temperature);
+
+    uint8_t modeset = frame[6] & 0xE0;
+    switch(modeset){
+        case 0x20:
+            this->mode = climate::CLIMATE_MODE_COOL;
+            break;
+        case 0xC0:
+            this->mode = climate::CLIMATE_MODE_FAN_ONLY;
+            break;
+        case 0x40:
+            this->mode = climate::CLIMATE_MODE_DRY;
+            break;
+        case 0x80:
+            this->mode = climate::CLIMATE_MODE_HEAT;
+            break;
+        case 0x00:
+        default:
+            this->mode = climate::CLIMATE_MODE_AUTO;
+    }
+
+    uint8_t on_off = frame[9] & 0x30;
+    if (on_off == 0x00){
+        this->mode = climate::CLIMATE_MODE_OFF;
+    }
+
+    ESP_LOGCONFIG(TAG, "Mode %x", modeset);
+    ESP_LOGCONFIG(TAG, "Mode %x", this->mode);
+
+
+    this->publish_state();
+
     return true;
+
 }
 
 uint8_t YKRLClimate::temperature_(){
