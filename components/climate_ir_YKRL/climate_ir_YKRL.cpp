@@ -84,7 +84,7 @@ uint8_t YKRLClimate::temperature_(){
         case climate::CLIMATE_MODE_AUTO:
             return 0x00;
         default:
-            return ((uint8_t) roundf(this->target_temperature) - TEMP_OFFSET)<<3;
+            return ((uint8_t) int(this->target_temperature) - TEMP_OFFSET)<<3;
     }
 }
 
