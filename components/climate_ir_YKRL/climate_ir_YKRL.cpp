@@ -1,5 +1,4 @@
 #include "climate_ir_YKRL.h"
-#include "esphome/core/log.h"
 
 namespace esphome {
 namespace climate_ir_YKRL {
@@ -38,7 +37,7 @@ void YKRLClimate::transmit_state() {
     remote_state[6] = mode_();
     // Byte 9 - ON/OFF
     remote_state[9] = this->mode == climate::CLIMATE_MODE_OFF ? 0x00 : 0x20;
-    // Byte 11 - ¿Random=
+    // Byte 11 - ¿Random?
     remote_state[11] = 0x05;
 
     //Calculate checksum

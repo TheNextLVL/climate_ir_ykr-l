@@ -1,2 +1,21 @@
 ---
-#TODO
+# External components
+external_components:
+  - source:
+      type: git
+      url: https://github.com/TheNextLVL/climate_ir_ykr-l
+    components: [ climate_ir_YKRL ]
+    refresh: 1days
+
+remote_receiver:
+  id: infrared_receiver
+  pin:
+    number: 8
+    mode: INPUT_PULLUP
+    inverted: True
+
+climate:
+  - platform: climate_ir_YKRL
+    name: "BAXI AC"
+    receiver_id: infrared_receiver
+    sensor: temperature_sensor

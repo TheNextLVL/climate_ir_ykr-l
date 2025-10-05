@@ -1,5 +1,6 @@
 #pragma once
 
+#include "esphome/core/log.h"
 #include "esphome/components/climate_ir/climate_ir.h"
 
 namespace esphome {
