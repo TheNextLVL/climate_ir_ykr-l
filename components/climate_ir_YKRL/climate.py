@@ -9,4 +9,4 @@ YKRLClimate = climate_ir_YKRL_ns.class_("YKRLClimate", climate_ir.ClimateIR)
 CONFIG_SCHEMA = climate_ir.climate_ir_with_receiver_schema(YKRLClimate)
 
 async def to_code(config):
-    await climate_ir.register_climate_ir(config)
+    await climate_ir.new_climate_ir(config)
